@@ -15,14 +15,27 @@ body {
 header {
 	position: fixed;
 	top: 0;
+	width: 100%;
 	z-index: 2;
+	background: -webkit-linear-gradient(#555 0%, #000 50%);
+	background: -moz-linear-gradient(#555 0%, #000 50%);
+	background: linear-gradient(#555 0%, #000 50%);
+	padding: .5em 1em;
 }
 h1 {
-	margin: 0 0 0 1em;
-	font-size: 1.6em;
-	text-shadow: 0px 2px 2px #fff;
+	margin: 0;
+	color: #fff;
+	font-size: 1em;
+	text-transform: uppercase;
+	text-align: center;
+	font-weight: 600;
+	//text-shadow: 0px 2px 2px #fff;
 }
 
+h2 {
+	margin-top: 2.5em;
+	font-size: 1em;
+}
 a {
 	color: #3B5998;
 	text-decoration: none;
@@ -33,15 +46,33 @@ img {
 }
 
 button {
-	background: maroon;
+	background: -webkit-linear-gradient(#555 0%, #000 50%);
+	background: -moz-linear-gradient(#555 0%, #000 50%);
+	background: linear-gradient(#555 0%, #000 50%);
 	padding: 10px 15px;
 	color: #fff;
-	font-size: 1.2em;
+	font-size: 1em;
+	width: 120px;
 	border: 0;
+	border-radius: 12px 12px 0px 0px;
 	position: fixed;
 	bottom: 0;
-	right: 0;
+	left: 50%;
+	margin: 0;
+	margin-left: -60px;
 	cursor: pointer;
+	text-transform: uppercase;
+	z-index: 3;
+}
+
+hr {
+	position: fixed;
+	bottom: 0;
+	width: 100%;
+	margin: 0;
+	height: 16px;
+	background: #d23505;
+	display: block;
 	z-index: 2;
 }
 
@@ -56,22 +87,28 @@ button {
 #closestVenue {
 	text-align: center;
 	z-index: 1;
-	background: #fff;
+	background: rgba(255, 255, 255, .9);
 }
 #closestVenue img {
-	margin-top: 100px;
-	width: 200px;
+	margin-top: 5px;
+	width: 170px; 
+	height: 276px;
 	margin-bottom 1em;
-	color: #333346
+	color: #333346;
+}
+.business {
+	text-transform: uppercase;
+	letter-spacing: 1px;
+	font-weight: bold;
 }
 
 @media (min-width: 800px) {
-	h1 {
-		font-size: 4em;
+	h2 {
+		font-size: 3em;
+		margin-top: 1.4em;
 	}
 	#closestVenue img {
-		margin-top: 200px;
-		width: 190px;
+		width: 200px;
 		margin-bottom 1em;
 	}
 }

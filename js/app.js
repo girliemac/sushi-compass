@@ -28,7 +28,7 @@
     
     showMapButton.addEventListener('click', function(){
 	    //window.scrollTo(0, compassPane.clientHeight);
-	    if(showMapButton.textContent == 'Compass') {
+	    if(showMapButton.textContent == 'COMPASS' || showMapButton.textContent == 'Compass') {
 		    showMapButton.textContent = 'Map me';
 		    mapPane.style.zIndex = '0';
 	    } else {
@@ -86,17 +86,18 @@
 	}
 	
 	function findFood(loc) {
-		var url = SEARCH_URL + '&ll=' + loc.lat + ',' + loc.lon + '&query=sushi&limit=5&v=' + yyyymmdd();
+		var url = SEARCH_URL + '&ll=' + loc.lat + ',' + loc.lon + '&query=sushi&limit=4&v=' + yyyymmdd();
 		console.log(url);
-		
+
 		var xhr = new XMLHttpRequest();
 		xhr.open('GET', url);
 		xhr.onload = function(){
 			data = JSON.parse(xhr.response);
-			console.log(data.response);
-			
-			displayClosest(data);
-			displayPlacesOnMap(data);
+			sortPlacesByDistance(data.response.venues, function(results){
+				//console.log(results);
+				showCompass(results[0]);
+				displayPlacesOnMap(results);
+			});
 		};
 	    xhr.onerror = function(){
 		    alert('An error occurred while uploading the file.');
@@ -112,38 +113,35 @@
 	}
 	
 	
-	function displayClosest(data) {
-		var venues = data.response.venues;
-		var distArray = [];
-		
+	function sortPlacesByDistance(venues, callback) {
 		for(var i = 0; i < venues.length; i++) {
 			var venue = venues[i];
-			var vLat = venue.location.lat;
-			var vLon = venue.location.lng;
+			var venueLocation = {lat: venue.location.lat, lon: venue.location.lng};
 			
-			var venueLocation = {lat: vLat, lon: vLon};
 			var dist = getDistanceFromCoords(venueLocation, userLocation);
-			distArray.push(dist);
+			
+			venue.distance = dist;
 		}
-		var closestDist = Array.min(distArray); 
-		var index = distArray.indexOf(closestDist);
-		console.log(distArray, closestDist, index);
 		
-		document.querySelector('#closestVenue article').textContent = venues[index].name;
-		document.querySelector('#closestVenue address').textContent = venues[index].location.address;
-		document.querySelector('#closestVenue .distance').textContent = closestDist + ' km';;
-		
-		showCompass(venueLocation);
+		venues.sort(function(a,b){return a.distance - b.distance});
+
+		callback(venues);
 	}
 	
-	function showCompass(venueLocation) {
+	function showCompass(closestVenue) {
 		if(typeof window.DeviceOrientationEvent !== 'function') {
 			alert('Your browser does not support DeviceOrientation Event API');
 			return;
 		} 
 		
+		document.querySelector('#closestVenue .business').textContent = closestVenue.name;
+		document.querySelector('#closestVenue .address').textContent = closestVenue.location.address;
+		document.querySelector('#closestVenue .distance').textContent = closestVenue.distance + ' km';
+		
 		var compass = document.querySelector('#closestVenue img');
 		
+		var venueLocation = {lat: closestVenue.location.lat, lon: closestVenue.location.lng};
+			
 		var deg = getBearingFromCoords(venueLocation, userLocation);
 		
 		window.addEventListener('deviceorientation', function(e) {
@@ -154,8 +152,8 @@
 		});
 	}
 	
-	function displayPlacesOnMap(data) {
-		var venues = data.response.venues;
+	function displayPlacesOnMap(venues) {
+		venues.reverse();
 		
 		for(var i = 0; i < venues.length; i++) {
 			var venue = venues[i];
@@ -165,17 +163,17 @@
 			var marker = new google.maps.Marker({
 				position: mapLoc,
 				map: map,
-				icon: 'images/marker.png'
+				icon: 'images/marker.png',
+				html: '<strong>' + venue.name + '</strong><br>' + venue.location.address
 			});
 			
-			var infowindow = new google.maps.InfoWindow({maxWidth: 200});
-			infowindow.setContent(venue.name + ': ' + venue.location.address);
-			
-			//google.maps.event.addListener(marker, 'click', function() {
-				infowindow.open(map, marker);
-			//});
+			var infowindow = new google.maps.InfoWindow({maxWidth: 150});
+
+			google.maps.event.addListener(marker, 'click', function() {
+				infowindow.setContent(this.html);
+				infowindow.open(map, this);
+			});
 		}
-		
 	}
 	
 	Array.min = function( array ){
