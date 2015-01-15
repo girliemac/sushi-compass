@@ -1,6 +1,7 @@
 (function(){
 
 	var userLocation = {};
+	var closestVenueLocation = {};
 	var markers = {};
 	var data = {};
 	
@@ -27,8 +28,7 @@
     mapUserLocation();
     
     showMapButton.addEventListener('click', function(){
-	    //window.scrollTo(0, compassPane.clientHeight);
-	    if(showMapButton.textContent == 'COMPASS' || showMapButton.textContent == 'Compass') {
+	    if(showMapButton.textContent.toLowerCase() == 'compass') {
 		    showMapButton.textContent = 'Map me';
 		    mapPane.style.zIndex = '0';
 	    } else {
@@ -71,7 +71,7 @@
 		}
 		
 		function errorCallback(error) {
-			geoPane.innerHTML = '<em style="color:red; line-height:3em">Error: ' + error.message + '</em>';
+			compassPane.innerHTML = '<em style="color:red; line-height:3em">Error: ' + error.message + '</em>';
 			return;
 		}
 	}
@@ -118,7 +118,7 @@
 			var venue = venues[i];
 			var venueLocation = {lat: venue.location.lat, lon: venue.location.lng};
 			
-			var dist = getDistanceFromCoords(venueLocation, userLocation);
+			var dist = getDistanceFromCoords(userLocation, venueLocation);
 			
 			venue.distance = dist;
 		}
@@ -126,6 +126,14 @@
 		venues.sort(function(a,b){return a.distance - b.distance});
 
 		callback(venues);
+	}
+	
+	function updateDistance(position) {
+		var lat = position.coords.latitude;
+		var lon = position.coords.longitude;
+		var dist = getDistanceFromCoords(closestVenueLocation, userLocation);
+		document.querySelector('#closestVenue .distance').textContent = dist + ' km';
+		console.log(dist);
 	}
 	
 	function showCompass(closestVenue) {
@@ -140,15 +148,25 @@
 		
 		var compass = document.querySelector('#closestVenue img');
 		
-		var venueLocation = {lat: closestVenue.location.lat, lon: closestVenue.location.lng};
+		closestVenueLocation = {lat: closestVenue.location.lat, lon: closestVenue.location.lng};
 			
-		var deg = getBearingFromCoords(venueLocation, userLocation);
+		var deg = getBearingFromCoords(userLocation, closestVenueLocation);
 		
 		window.addEventListener('deviceorientation', function(e) {
-			var r = deg - (e.webkitCompassHeading || e.alpha) + 180;
+			deg = (deg < 0) ? 360 + deg : deg; // e.g. -20deg bearing from north -> 340deg
+
+			// make an adjestment with the current cardinal direction. 0 should be abs north
+			var r = deg - (e.webkitCompassHeading || e.alpha); 
+
 			compass.style.webkitTransform = 'rotate(' + r + 'deg)';
 			compass.style.MozTransform = 'rotate(' + r + 'deg)';
 			compass.style.transform = 'rotate(' + r + 'deg)';
+		});
+		
+		navigator.geolocation.watchPosition(updateDistance, function(error){console.log(error)}, {
+		  enableHighAccuracy: false,
+		  timeout: 5000,
+		  maximumAge: 0
 		});
 	}
 	

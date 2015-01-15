@@ -14,10 +14,10 @@ Number.prototype.toDeg = function() {
 function getDistanceFromCoords (from, to, decimals) {
     decimals = decimals || 2;
     var R = 6371; // The earth radius in km
-    latFrom = parseFloat(from.lat);
-    latTo = parseFloat(to.lat);
-    lonFrom = parseFloat(from.lon);
-    lonTo = parseFloat(to.lon);
+    var latFrom = parseFloat(from.lat);
+    var latTo = parseFloat(to.lat);
+    var lonFrom = parseFloat(from.lon);
+    var lonTo = parseFloat(to.lon);
  
     var dLat = (latTo - latFrom).toRad();
     var dLon = (lonTo - lonFrom).toRad();
@@ -33,6 +33,11 @@ function getDistanceFromCoords (from, to, decimals) {
 };
 
 function getBearingFromCoords(from, to){
+    var latFrom = parseFloat(from.lat);
+    var latTo = parseFloat(to.lat);
+    var lonFrom = parseFloat(from.lon);
+    var lonTo = parseFloat(to.lon);
+
     var dLon = (lonTo - lonFrom).toRad();
     var lat1 = latFrom.toRad();
     var lat2 = latTo.toRad();
